@@ -101,12 +101,12 @@
   <div class="footer">Luxury Wholesale · fee floor $100k+ · data refreshes every 60s · honest labels only: [verified] vs [unverified snippet]</div>
 </div>
 <script>
-const KEY_HASH = "6b83e06f90252739d555c96f45640253f13e2db43d7e1120cccd47dfedeea50f";
+const KEY_HASH = "9a3126db2658225c988ce2fe28108546363e05423a13566ca73f26ce1c1889b7";
 const FUNC_URL = "https://superagent-e1f4347f.base44.app/functions/getLuxDashboardData";
 function sha256(s){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""));}
 async function unlock(){
   const k=document.getElementById("key").value.trim().toUpperCase();
-  if((await sha256(k))===KEY_HASH||(await sha256(k))==="2ac85a11513fc6de9fad97fb168c4fa6eab3e04d957768a1c78966b82eac09fd"){sessionStorage.setItem("luxkey",k);show();}else{document.getElementById("gerr").style.display="block";}
+  if((await sha256(k))===KEY_HASH){sessionStorage.setItem("luxkey",k);show();}else{document.getElementById("gerr").style.display="block";}
 }
 document.getElementById("key").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 if(sessionStorage.getItem("luxkey"))show();
