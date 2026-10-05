@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luxury Wholesale — Command Deck</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0c0d11; color:#e8e6e1; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; min-height:100vh; }
+  .gate { max-width:420px; margin:18vh auto 0; text-align:center; padding:32px; }
+  .gate h1 { font-family:Georgia,serif; color:#d4af37; font-size:26px; margin-bottom:8px; letter-spacing:1px; }
+  .gate p { color:#8a887f; font-size:13px; margin-bottom:20px; }
+  .gate input { width:100%; padding:12px; background:#14161c; border:1px solid #2a2d36; color:#e8e6e1; border-radius:6px; font-size:14px; text-align:center; }
+  .gate button { margin-top:12px; width:100%; padding:12px; background:#d4af37; color:#0c0d11; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:14px; }
+  .gate .err { color:#e05c5c; font-size:12px; margin-top:10px; display:none; }
+  .wrap { max-width:1280px; margin:0 auto; padding:28px 20px 60px; display:none; }
+  header { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid #23262e; padding-bottom:16px; margin-bottom:24px; }
+  header h1 { font-family:Georgia,serif; color:#d4af37; font-size:26px; letter-spacing:1px; }
+  header .sub { color:#8a887f; font-size:12px; margin-top:4px; }
+  .live { display:flex; align-items:center; gap:8px; font-size:12px; color:#8a887f; }
+  .pulse { width:9px; height:9px; border-radius:50%; background:#4caf7d; display:inline-block; animation:pulse 2s infinite; }
+  .pulse.bad { background:#e05c5c; }
+  @keyframes pulse { 0%{opacity:1} 50%{opacity:.35} 100%{opacity:1} }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin-bottom:30px; }
+  .kpi { background:#14161c; border:1px solid #23262e; border-radius:10px; padding:18px; }
+  .kpi .v { color:#d4af37; font-size:26px; font-weight:700; font-family:Georgia,serif; }
+  .kpi .l { color:#8a887f; font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+  h2 { font-family:Georgia,serif; color:#d4af37; font-size:18px; margin:34px 0 12px; letter-spacing:.5px; }
+  h2 .cnt { color:#8a887f; font-size:12px; font-family:'Segoe UI',sans-serif; font-weight:400; margin-left:8px; }
+  .tblwrap { overflow-x:auto; border:1px solid #23262e; border-radius:10px; background:#14161c; }
+  table { width:100%; border-collapse:collapse; font-size:13px; white-space:nowrap; }
+  th { text-align:left; padding:12px 12px; color:#8a887f; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #23262e; background:#181a20; cursor:pointer; user-select:none; }
+  th:hover { color:#d4af37; }
+  td { padding:11px 12px; border-bottom:1px solid #1d2027; vertical-align:top; }
+  tr:hover td { background:#181a20; }
+  tr:last-child td { border-bottom:none; }
+  .addr { font-weight:600; color:#f0eee9; }
+  .gold { color:#d4af37; font-weight:700; }
+  .cut { color:#4caf7d; font-weight:700; }
+  .dim { color:#8a887f; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; letter-spacing:.5px; }
+  .tag.new { background:#1d3327; color:#4caf7d; }
+  .tag.rec { background:#33291d; color:#d4af37; }
+  a { color:#9db4d8; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .notes { max-width:280px; white-space:normal; color:#8a887f; font-size:11px; line-height:1.45; }
+  .banner { background:#2b1d1d; color:#e05c5c; padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:18px; display:none; }
+  .footer { margin-top:26px; color:#5c5a52; font-size:11px; text-align:center; }
+  @media (max-width:640px){ header{flex-direction:column; align-items:flex-start; gap:8px;} }
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <h1>LUXURY WHOLESALE</h1>
+  <p>Command Deck — restricted access</p>
+  <input type="password" id="key" placeholder="Access key" autocomplete="off">
+  <button onclick="unlock()">Enter</button>
+  <div class="err" id="gerr">Wrong key. Try again.</div>
+</div>
+<div class="wrap" id="wrap">
+  <header>
+    <div>
+      <h1>Luxury Wholesale — Command Deck</h1>
+      <div class="sub" id="stamp">loading…</div>
+    </div>
+    <div class="live"><span class="pulse" id="dot"></span><span id="livetxt">live</span></div>
+  </header>
+  <div class="banner" id="banner"></div>
+  <div class="kpis" id="kpis"></div>
+  <h2>Scouted Houses <span class="cnt" id="hcnt"></span></h2>
+  <div class="tblwrap">
+    <table id="houses">
+      <thead><tr>
+        <th onclick="sortH('address')">Address ▾</th>
+        <th onclick="sortH('area')">Area</th>
+        <th onclick="sortH('asking',1)">Asking $</th>
+        <th onclick="sortH('last_cut',1)">Price Cut</th>
+        <th onclick="sortH('dom',1)">DOM</th>
+        <th onclick="sortH('sqft',1)">SqFt</th>
+        <th onclick="sortH('ppsf',1)">$/SqFt</th>
+        <th onclick="sortH('year',1)">Built</th>
+        <th>Owner of Record</th>
+        <th onclick="sortH('lead_type')">Type</th>
+        <th>Status</th>
+        <th>Source</th>
+        <th>Intel Notes</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <h2>Developer &amp; Builder Contacts <span class="cnt" id="bcnt"></span></h2>
+  <div class="tblwrap">
+    <table id="buyers">
+      <thead><tr>
+        <th>Company</th><th>Type</th><th>Contact</th><th>Phone</th><th>Email</th><th>Website</th><th>Area</th><th>Status</th><th>Notes</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="footer">Luxury Wholesale · fee floor $100k+ · data refreshes every 60s · honest labels only: [verified] vs [unverified snippet]</div>
+</div>
+<script>
+const KEY_HASH = "6b83e06f90252739d555c96f45640253f13e2db43d7e1120cccd47dfedeea50f";
+const FUNC_URL = "https://superagent-e1f4347f.base44.app/functions/getLuxDashboardData";
+function sha256(s){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""));}
+async function unlock(){
+  const k=document.getElementById("key").value.trim();
+  if(await sha256(k)===KEY_HASH){sessionStorage.setItem("luxkey",k);show();}else{document.getElementById("gerr").style.display="block";}
+}
+document.getElementById("key").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
+if(sessionStorage.getItem("luxkey"))show();
+function show(){document.getElementById("gate").style.display="none";document.getElementById("wrap").style.display="block";load();setInterval(load,60000);}
+const fm=n=>n==null?"—":"$"+Number(n).toLocaleString();
+let D=null,hsort={k:"last_cut",d:-1};
+function sortH(k,num){if(hsort.k===k)hsort.d*=-1;else{hsort.k=k;hsort.d=-1;}renderH();}
+async function load(){
+  try{
+    const r=await fetch(FUNC_URL);
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    D=await r.json();
+    if(!D.ok)throw new Error(D.error||"backend error");
+    document.getElementById("dot").className="pulse";
+    document.getElementById("livetxt").textContent="live";
+    document.getElementById("banner").style.display="none";
+    document.getElementById("stamp").textContent="Phoenix/Scottsdale sweep · updated "+new Date(D.generated_at).toLocaleString();
+    const K=D.kpis;
+    document.getElementById("kpis").innerHTML=
+      `<div class="kpi"><div class="v">${K.total_houses}</div><div class="l">Houses Scouted</div></div>`+
+      `<div class="kpi"><div class="v">${fm(K.price_cut_total)}</div><div class="l">Total Price Cuts</div></div>`+
+      `<div class="kpi"><div class="v">${K.avg_dom}</div><div class="l">Avg Days on Market</div></div>`+
+      `<div class="kpi"><div class="v">${K.total_buyers}</div><div class="l">Buyers on List</div></div>`;
+    document.getElementById("hcnt").textContent="("+D.houses.length+")";
+    document.getElementById("bcnt").textContent="("+D.buyers.length+")";
+    renderH();
+    document.getElementById("buyers").querySelector("tbody").innerHTML=D.buyers.map(b=>`<tr>
+      <td class="addr">${b.business||"—"}</td>
+      <td class="dim">${b.type||"—"}</td>
+      <td class="dim">${b.contact||"—"}</td>
+      <td>${b.phone?`<a href="tel:${b.phone.replace(/[^\\d]/g,"")}">${b.phone}</a>`:"—"}</td>
+      <td>${b.email?`<a href="mailto:${b.email}">${b.email}</a>`:"—"}</td>
+      <td>${b.website?`<a href="${b.website}" target="_blank" rel="noopener">site ↗</a>`:"—"}</td>
+      <td class="dim">${b.area||"—"}</td>
+      <td><span class="tag ${b.status==="New"?"new":"rec"}">${b.status||"—"}</span></td>
+      <td class="notes">${b.notes||""}</td></tr>`).join("");
+  }catch(e){
+    document.getElementById("dot").className="pulse bad";
+    document.getElementById("livetxt").textContent="offline";
+    const b=document.getElementById("banner");b.style.display="block";b.textContent="Data feed unreachable: "+e.message+" — showing last good data if any.";
+  }
+}
+function renderH(){
+  if(!D)return;
+  const rows=[...D.houses];
+  const k=hsort.k,num=["asking","last_cut","dom","sqft","ppsf","year"].includes(k);
+  rows.sort((a,b)=>{const x=a[k],y=b[k];if(x==null)return 1;if(y==null)return -1;return (num?(x>y?1:x<y?-1:0):String(x).localeCompare(String(y)))*hsort.d;});
+  document.getElementById("houses").querySelector("tbody").innerHTML=rows.map(h=>`<tr>
+    <td class="addr">${h.address||"—"}</td>
+    <td class="dim">${h.area||"—"}</td>
+    <td class="gold">${fm(h.asking)}</td>
+    <td class="cut">${h.last_cut?"−"+fm(h.last_cut):"—"}</td>
+    <td>${h.dom?? "—"}</td>
+    <td class="dim">${h.sqft?h.sqft.toLocaleString():"—"}</td>
+    <td class="dim">${h.ppsf?"$"+h.ppsf:"—"}</td>
+    <td class="dim">${h.year||"—"}</td>
+    <td class="dim">${h.owner||"—"}</td>
+    <td>${h.lead_type||"—"}</td>
+    <td><span class="tag ${h.status==="New"?"new":"rec"}">${h.status||"—"}</span></td>
+    <td>${h.source?`<a href="${h.source}" target="_blank" rel="noopener">listing ↗</a>`:"—"}</td>
+    <td class="notes">${h.notes||""}</td></tr>`).join("");
+}
+</script>
+</body>
+</html>
