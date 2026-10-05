@@ -66,6 +66,14 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
 .nav{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 10px;font-size:12px;}
 .nav a{color:#9db4d8;text-decoration:none;}
 .nav a:hover{text-decoration:underline;}
+.calcgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0;}
+.calcgrid label{display:block;font-size:10px;color:#8a887f;text-transform:uppercase;letter-spacing:1px;}
+.calcgrid input{width:100%;margin-top:5px;padding:9px;background:#0e0f13;border:1px solid #2a2d36;color:#e8e6e1;border-radius:6px;font-size:15px;}
+.calcres{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px;}
+.calcres .cell{background:#181a20;border:1px solid #23262e;border-radius:8px;padding:12px;}
+.calcres .l{display:block;font-size:10px;color:#8a887f;text-transform:uppercase;letter-spacing:1px;}
+.calcres .v{display:block;margin-top:6px;color:#d4af37;font-size:17px;font-weight:700;font-family:Georgia,serif;}
+.huntlinks a{display:inline-block;background:#181a20;border:1px solid #23262e;border-radius:8px;padding:10px 14px;margin:4px 4px 4px 0;font-size:13px;color:#d4af37;}
 </style>
 </head>
 <body>
@@ -192,6 +200,22 @@ function unlock() {
 }
 F("key").addEventListener("keydown", (e) => { if (e.key === "Enter") unlock(); });
 if (sessionStorage.getItem("luxpin")) tryEnter();
+function luxCalc() {
+  const val = (id) => { const el = F(id); if (!el) return 0; const n = parseFloat(String(el.value).replace(/[^0-9.]/g, "")); return isNaN(n) ? 0 : n; };
+  const arv = val("calc-arv"), rep = val("calc-rep"), fee = val("calc-fee") || 100000, cush = val("calc-cush"), ask = val("calc-ask");
+  const allin = arv * 0.75;
+  const max = allin - rep - fee - cush;
+  F("calc-allin").textContent = arv > 0 ? "$" + Math.round(allin).toLocaleString() : "\u2014";
+  const mx = F("calc-max");
+  if (arv <= 0) mx.textContent = "\u2014";
+  else if (max <= 0) mx.textContent = "$0";
+  else mx.textContent = "$" + Math.round(max).toLocaleString();
+  const v = F("calc-verdict");
+  if (arv <= 0) v.textContent = "enter an ARV";
+  else if (max <= 0) v.textContent = "dead deal \u2014 fee doesn't fit this ARV, renegotiate or walk";
+  else if (ask > 0) v.textContent = "ceiling = " + Math.round((max / ask) * 100) + "% of asking (needs a " + Math.round((1 - max / ask) * 100) + "% cut)";
+  else v.textContent = "fee fits \u2014 go get the seller";
+}
 function renderH() {
   if (!D) return;
   const rows = [...D.houses];
