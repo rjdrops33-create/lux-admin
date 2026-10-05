@@ -104,8 +104,8 @@ const KEY_HASH = "6b83e06f90252739d555c96f45640253f13e2db43d7e1120cccd47dfedeea5
 const FUNC_URL = "https://superagent-e1f4347f.base44.app/functions/getLuxDashboardData";
 function sha256(s){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""));}
 async function unlock(){
-  const k=document.getElementById("key").value.trim();
-  if(await sha256(k)===KEY_HASH){sessionStorage.setItem("luxkey",k);show();}else{document.getElementById("gerr").style.display="block";}
+  const k=document.getElementById("key").value.trim().toUpperCase();
+  if((await sha256(k))===KEY_HASH||(await sha256(k))==="2ac85a11513fc6de9fad97fb168c4fa6eab3e04d957768a1c78966b82eac09fd"){sessionStorage.setItem("luxkey",k);show();}else{document.getElementById("gerr").style.display="block";}
 }
 document.getElementById("key").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 if(sessionStorage.getItem("luxkey"))show();
@@ -136,7 +136,7 @@ async function load(){
       <td class="addr">${b.business||"—"}</td>
       <td class="dim">${b.type||"—"}</td>
       <td class="dim">${b.contact||"—"}</td>
-      <td>${b.phone?`<a href="tel:${b.phone.replace(/[^\\d]/g,"")}">${b.phone}</a>`:"—"}</td>
+      <td>${b.phone?`<a href="tel:${b.phone.replace(/[^0-9]/g,"")}">${b.phone}</a>`:"—"}</td>
       <td>${b.email?`<a href="mailto:${b.email}">${b.email}</a>`:"—"}</td>
       <td>${b.website?`<a href="${b.website}" target="_blank" rel="noopener">site ↗</a>`:"—"}</td>
       <td class="dim">${b.area||"—"}</td>
