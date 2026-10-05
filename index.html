@@ -48,6 +48,24 @@
   .banner { background:#2b1d1d; color:#e05c5c; padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:18px; display:none; }
   .footer { margin-top:26px; color:#5c5a52; font-size:11px; text-align:center; }
   @media (max-width:640px){ header{flex-direction:column; align-items:flex-start; gap:8px;} }
+
+details.acc{background:#14161c;border:1px solid #23262e;border-radius:10px;margin:10px 0;}
+details.acc summary{padding:14px 16px;cursor:pointer;color:#d4af37;font-weight:600;font-size:14px;list-style:none;}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::before{content:"\25B8  ";color:#d4af37;}
+details.acc[open] summary::before{content:"\25BE  ";}
+details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color:#c6c8c2;white-space:normal;}
+.body ol,.body ul{margin:8px 0 8px 22px;padding:0;}
+.body li{margin:7px 0;}
+.body b{color:#e8e6e1;}
+.script{background:#101318;border-left:3px solid #d4af37;border-radius:6px;padding:12px 14px;margin:10px 0;font-style:italic;color:#e8e6e1;}
+.script b{color:#d4af37;font-style:normal;}
+.key{color:#4caf7d;font-size:12px;}
+.formula{background:#181a20;border:1px solid #23262e;border-radius:6px;padding:10px 14px;margin:10px 0;color:#d4af37;font-family:Georgia,serif;font-size:14px;}
+.warn{background:#2b1d1d;border-left:3px solid #e05c5c;padding:10px 14px;border-radius:6px;color:#f0c8c8;margin:10px 0;font-size:12px;}
+.nav{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 10px;font-size:12px;}
+.nav a{color:#9db4d8;text-decoration:none;}
+.nav a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -98,7 +116,126 @@
       <tbody></tbody>
     </table>
   </div>
-  <div class="footer">Luxury Wholesale · fee floor $100k+ · data refreshes every 60s · honest labels only: [verified] vs [unverified snippet]</div>
+  <nav class="nav">
+  <a href="#houses">Houses</a><a href="#buyers">Buyers</a><a href="#playbook">Playbook</a><a href="#process">Deal Process</a><a href="#scripts">Call Scripts</a><a href="https://rjdrops33-create.github.io/luxwholesale-kit/" target="_blank" rel="noopener">Full Kit ↗</a>
+</nav>
+
+<h2 id="playbook">Playbook — The Rules of the Game</h2>
+
+<details class="acc" open><summary>The One Rule — $100k Fee Floor</summary><div class="body">
+The fee floor is <b>$100k</b>. Every deal either clears it or we don't sign it. Wide spreads come from deeper discounts, the $3M+ price band (carries six-figure fees far more often), or double-closes where the total spread clears six figures. Walk-away number is set BEFORE every call.
+<div class="formula">Max Offer = (ARV × 0.75) − Repair Costs − Your Fee − Buyer's Profit Cushion</div>
+Example at scale: ARV $3.5M, repairs $400k, buyer all-in at $2.6M → contract at $2.5M = $100k assignment. Contract at $2.35M → double-close for a $250k spread.
+</div></details>
+
+<details class="acc"><summary>Mechanics — Assignment vs Double-Close</summary><div class="body">
+<b>Assignment (default):</b> put the house under contract at a discount, sell your POSITION in the contract to a cash buyer for the fee at closing. You never own the house, never touch a loan. Contract carries "and/or assigns" plus the assignment right disclosed to the seller.
+<b>Double-close (backup):</b> at $2M+, parties sometimes get uncomfortable seeing your fee on the settlement statement. You buy, resell same day, usually via transactional funding (typically ~1-2% of purchase price). Costs more, keeps the spread private. Use it when the gap is large or the parties are touchy.
+</div></details>
+
+<details class="acc"><summary>Metro Shortlist &amp; Where to Hunt</summary><div class="body">
+<ol>
+<li><b>Phoenix/Scottsdale AZ</b> — Paradise Valley, Silverleaf, North Scottsdale. Teardown/rebuild culture, wealthy transplants. ACTIVE NOW.</li>
+<li><b>Dallas TX</b> — Highland Park, University Park, Preston Hollow. Old + new money cash, heavy estate activity.</li>
+<li><b>Miami/Palm Beach FL</b> — Coral Gables, Coconut Grove, Palm Beach outskirts. International cash, probate-rich.</li>
+<li><b>Atlanta GA</b> — Buckhead, Sandy Springs. Fast-growing wealth, cheaper buyer pool to build.</li>
+<li><b>Detroit Metro</b> — Bloomfield Hills, Birmingham. Home turf advantage, face-to-face access.</li>
+</ol>
+Sweep filters per pocket: $2M+ (bias $3M+), sort by Price Cut (Latest), watch for $150k+ cuts after 90+ days; FSBO $2M+; pre-foreclosure; expired listings via a licensed agent partner for a referral cut. Owner identity via county assessor + probate records.
+</div></details>
+
+<details class="acc"><summary>State Protocol — Same 5 Steps Everywhere</summary><div class="body">
+<ol>
+<li><b>Rule check</b> — verify assignment/unlicensed-wholesaling rules BEFORE any outreach in a state. Comply, partner with a licensed agent, or skip. Never guess.</li>
+<li><b>Pocket map</b> — the state's 2-3 top $2M+ areas by luxury turnover.</li>
+<li><b>Signal sweep</b> — price cuts, 90+ DOM, FSBO, pre-foreclosure.</li>
+<li><b>Owner resolution</b> — assessor + probate court records → names, mailing addresses, estate situations.</li>
+<li><b>Load &amp; launch</b> — leads into this dashboard, outreach drafted, buyer list built in parallel.</li>
+</ol>
+Working order: AZ → TX → FL → GA → NV → TN → NC. Rule-check pending before entry: IL, OK, CA (restrictive; licensed partner only).
+</div></details>
+
+<details class="acc"><summary>Paperwork Kit (6 fillable PDFs)</summary><div class="body>
+01 Purchase &amp; Sale Agreement (assignable, AS-IS, inspection period) · 02 Assignment of Contract (the fee doc) · 03 LOI/Offer · 04 Authorization to Release Info · 05 Buyer Profile &amp; POF Request · 06 Non-Circumvention &amp; Confidentiality. Full bundle on the kit page — link at the top of the dashboard.
+<div class="warn">Templates, not legal advice. Before the first live contract in a new state, a local real estate attorney reviews ($200-500 one-time) — the $100k fee floor justifies it.</div>
+</div></details>
+
+<h2 id="process">Deal Process — Close It Step by Step</h2>
+
+<details class="acc" open><summary>The Full Close, Start to Fee</summary><div class="body">
+<ol>
+<li><b>Morning sweep</b> — leads land on this dashboard daily (5 AM AZ sweep). Review: 10%+ price cuts, 100+ DOM, $2M+ ($3M+ preferred for the fee floor).</li>
+<li><b>Underwrite BEFORE any call</b> — ARV from subdivision comps, repairs from photos/video, run the formula, set Max Offer and walk-away. No offer goes out without the number.</li>
+<li><b>Skip trace the owner</b> — assessor → LLC name → manager/member. Label everything [verified] vs [unverified].</li>
+<li><b>Two-track outreach</b> — call the listing agent (Script 1) AND send the owner a letter/email (Script 2). FSBO: call the owner direct (Script 4).</li>
+<li><b>Present the offer</b> — LOI or firm offer with proof of funds and earnest money attached. Clean terms stand out at this tier.</li>
+<li><b>Get it under contract</b> — "and/or assigns," AS-IS, 10-14 day inspection/feasibility window, defined close date. The inspection window is your shopping clock.</li>
+<li><b>Open title/escrow same day</b> — earnest money receipted, title work started.</li>
+<li><b>Shop within 24 hours</b> — top 5 matching buyers from the Buyers table get the one-pager first (specs, price, fee, close date), then the full list. Buyer gets 48h priority — a real deadline, not theater.</li>
+<li><b>Buyer commits</b> — signs Assignment of Contract + Non-Circumvention, proof of funds verified.</li>
+<li><b>Close</b> — assignment at closing (fee wired to you) or double-close if the spread is huge/parties are touchy.</li>
+<li><b>Log it</b> — outcome and fee go in the lead record; winners shape the next hunt.</li>
+</ol>
+Timeline: contract to fee is typically 2-3 weeks. The inspection window is the pressure — 10-14 days to have a committed buyer with POF.
+</div></details>
+
+<details class="acc"><summary>Follow-Up Cadence — The Ones That Got Away</summary><div class="body">
+<b>Day 3:</b> value touch — a recent $2M+ comp in their neighborhood, no ask.<br>
+<b>Day 7:</b> the honest nudge — "still glad to bring you a clean offer if the timing's right."<br>
+<b>Day 14:</b> closing-the-file note — "I'll take you off my list unless I should check back in spring."<br>
+Wealthy sellers move on their timeline. Persistence mode: no lead gets one touch and dropped.
+</div></details>
+
+<h2 id="scripts">Call Scripts — Every Call in the Chain</h2>
+
+<details class="acc" open><summary>Script 1 — Listing Agent (the gatekeeper call)</summary><div class="body">
+<div class="script">"Hi [Agent], I'm Ryian Willis — I'm a principal buyer with a private cash network, not calling about listings. Your listing at [address] caught my eye — I know it's taken a price cut and had some time on market. My buyers close clean: as-is, cash, no financing contingency, and your side of the commission is protected. If the seller would entertain a firm offer around [number], is it worth presenting? And help me not waste their time — what's the seller's situation, their timeline, what do they actually need?"</div>
+<span class="key">Key:</span> agents gatekeep listed deals. Say "principal, not agent," protect their commission up front, and ask about seller motivation — agents tell you everything to a buyer with clean terms. Set your number BEFORE dialing (the formula).
+</div></details>
+
+<details class="acc"><summary>Script 2 — Owner Direct: Price-Cut / Stale Listing</summary><div class="body">
+<div class="script">"Hi [Name], my name's Ryian. I saw your home on [Street] has been on the market a while — I'm not calling about listing it, I want to be clear about that. I work with private buyers who purchase homes like yours directly, in cash, as-is. No staging, no showings, no waiting on bank approvals. If I brought you an offer with a clean close on your timeline, is that something you'd want to hear about?"</div>
+<span class="key">Key:</span> disqualify yourself as an agent IMMEDIATELY. Their guard drops the second they know you're not hunting a commission.
+</div></details>
+
+<details class="acc"><summary>Script 3 — Owner Direct: Executor / Probate / Estate</summary><div class="body">
+<div class="script">"Hi [Name], I know this might be a difficult time, so I'll be brief. I work with families settling a property who don't want to stage it, show it, and wait six months for a retail sale. We purchase estate homes directly, as-is, with a clean cash close and no commissions deducted. If handling the house the simple way would take one thing off your plate, I'd be glad to walk you through exactly how it works — and if it's not a fit, I'll tell you that honestly and wish you well."</div>
+<span class="key">Key:</span> empathy FIRST, certainty second. Executors are drowning in decisions — you're the one caller offering to REMOVE a task, not add one.
+</div></details>
+
+<details class="acc"><summary>Script 4 — Owner Direct: FSBO</summary><div class="body">
+<div class="script">"Hi [Name], I saw you're selling your home yourself — respect, that's not easy in any market. I'm not an agent and I'm not calling to pitch you on one. I work with cash buyers who purchase homes directly from owners. If I could bring you a clean, no-commission offer so you never have to do another open house, would you want five minutes to hear the number?"</div>
+</div></details>
+
+<details class="acc"><summary>Script 5 — Buyer / Developer First Call (build the list BEFORE deals)</summary><div class="body">
+<div class="script">"Hi [Name], I acquire $2M+ properties in [Metro] — often before they hit the market, always at a discount to retail. When I have something in your lane, you get the first call, and the fee is built in, no games. What are you buying right now — flips, holds, or teardowns — and what does the perfect deal look like for you?"</div>
+<span class="key">Key:</span> qualify and log: price band, condition tolerance, area, cash source, close speed. 30 profiles means every contract already has three buyers.
+</div></details>
+
+<details class="acc"><summary>Script 6 — Shop the Deal (you're under contract, calling the buyer)</summary><div class="body">
+<div class="script">"Hi [Name], it's Ryian — you told me you're buying [teardowns/lots/estates] in [area]. I've got one under contract that fits: [address], [acres] acres, contracted at [price] — that's [x]% under comps before build. The assignment fee is [$fee], built in, and we close by [date] — clean, cash side, no contingencies from my end. Want the one-pager and walkthrough link? I can only hold this one [48 hours] — the window on my contract is real, not theater."</div>
+<span class="key">Key:</span> the deadline is the contract's actual inspection window — honest scarcity. First buyer to sign gets it. No auction theater.
+</div></details>
+
+<details class="acc"><summary>Script 7 — Negotiation Framing (the big five)</summary><div class="body">
+<b>1.</b> "What's your best number?" — calmly, after silence, always after they speak first.<br>
+<b>2.</b> Never justify your offer — state it, then stop talking. The first one to fill silence loses money.<br>
+<b>3.</b> Asked "what's in it for you?": <i>"I'm a principal in the transaction, not an agent — my network of buyers pays me to bring them discounted properties. It costs you nothing; it's between me and the buyer."</i><br>
+<b>4.</b> Handle "I'd rather list it": <i>"You absolutely can, and you'll probably get closer to retail — after 6 months of showings and 5-6% in commissions. I'm offering certainty and speed. If that's not worth a conversation, no hard feelings."</i><br>
+<b>5.</b> Walk-away discipline — the number is set before the call. Sellers at this tier respect someone who knows their math. Chasing kills credibility.
+</div></details>
+
+<details class="acc"><summary>Script 8 — Voicemail Drops (owner + agent)</summary><div class="body">
+<b>Owner VM:</b> <div class="script">"Hi [Name], Ryian Willis — a quick note about your home on [street]. I work with private cash buyers purchasing in [area]. If you'd ever consider a clean offer before the listing expires, call me at [your number]. No pressure either way. Take care."</div>
+<b>Agent VM:</b> <div class="script">"Hi [Agent], Ryian Willis — principal buyer with a cash network, interested in [address], possibly presenting a firm offer this week. Call me at [your number]. Thanks!"</div>
+<span class="key">Key:</span> under 20 seconds, no pitch, always leave a callback number.
+</div></details>
+
+<details class="acc"><summary>Scarlet's Standard Disclaimer</summary><div class="body">
+I prep the math, the language, and the machine. The signing, the negotiating voice, and the winning — that's you, boss. Everything here is education and process, not legal, tax, or financial advice.
+</div></details>
+
+<div class="footer">Luxury Wholesale · fee floor $100k+ · data refreshes every 60s · honest labels only: [verified] vs [unverified snippet]</div>
 </div>
 <script>
 const KEY_HASH = "9a3126db2658225c988ce2fe28108546363e05423a13566ca73f26ce1c1889b7";
