@@ -66,7 +66,9 @@
   #houses td,#buyers td{display:block;border:none;padding:3px 0;white-space:normal;}
   tr:hover td{background:transparent;}
   td.addr{font-weight:700;color:#e8e6e1;font-size:13px;}
-  #houses td:nth-child(2),#houses td:nth-child(4),#houses td:nth-child(7),#houses td:nth-child(9),#houses td:nth-child(10),#houses td:nth-child(11),#houses td:nth-child(12),#houses td:nth-child(13),#houses td:nth-child(15){display:none;}
+  td.addr a{color:#e8e6e1;text-decoration:underline;text-decoration-color:#b9975b;text-underline-offset:3px;}
+  #houses td:nth-child(2),#houses td:nth-child(4),#houses td:nth-child(7),#houses td:nth-child(9),#houses td:nth-child(10),#houses td:nth-child(11),#houses td:nth-child(12),#houses td:nth-child(13){display:none;}
+  #houses td:nth-child(15) a{color:#b9975b;font-size:11px;}
   #houses td:nth-child(3)::before{content:"Ask ";color:#8a887f;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
   #houses td:nth-child(5)::before{content:"Est fee ";color:#8a887f;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
   #houses td:nth-child(8)::before{content:"DOM ";color:#8a887f;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
@@ -168,6 +170,7 @@ let started = false;
 const fm = (n) => (n == null ? "\u2014" : "$" + Number(n).toLocaleString());
 let D = null;
 let hsort = { k: "last_cut", d: -1 };
+const srcUrl = (h) => (h.source ? String(h.source).split(" | ")[0].trim() : "");
 function sortH(k, num) { if (hsort.k === k) hsort.d *= -1; else { hsort.k = k; hsort.d = -1; } renderH(); }
 async function load() {
   try {
@@ -280,7 +283,7 @@ function renderH() {
   const k = hsort.k, num = ["asking", "last_cut", "dom", "sqft", "ppsf", "year", "__arv", "__fee", "__off"].includes(k);
   rows.sort((a, b) => { const x = a[k], y = b[k]; if (x == null) return 1; if (y == null) return -1; return (num ? (x > y ? 1 : x < y ? -1 : 0) : String(x).localeCompare(String(y))) * hsort.d; });
   F("houses").querySelector("tbody").innerHTML = rows.map((h) => `<tr>
-    <td class="addr">${h.address || "\u2014"}</td>
+    <td class="addr">${h.address ? (srcUrl(h) ? `<a href="${srcUrl(h)}" target="_blank" rel="noopener">${h.address}</a>` : h.address) : "\u2014"}</td>
     <td class="dim">${h.area || "\u2014"}</td>
     <td class="gold">${fm(h.asking)}</td>
     <td class="dim">${h.__arv ? fm(h.__arv) : "\u2014"}</td>
@@ -294,7 +297,7 @@ function renderH() {
     <td class="dim">${h.owner || "\u2014"}</td>
     <td>${h.lead_type || "\u2014"}</td>
     <td><span class="tag ${h.status === "New" ? "new" : "rec"}">${h.status || "\u2014"}</span></td>
-    <td>${h.source ? `<a href="${h.source}" target="_blank" rel="noopener">listing \u2197</a>` : "\u2014"}</td>
+    <td>${h.source ? `<a href="${srcUrl(h)}" target="_blank" rel="noopener">listing \u2197</a>` : "\u2014"}</td>
     <td class="notes">${h.notes || ""}</td></tr>`).join("");
 }
 </script>
