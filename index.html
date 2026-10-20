@@ -30,6 +30,7 @@
   h2 .cnt { color:#8a887f; font-size:12px; font-family:'Segoe UI',sans-serif; font-weight:400; margin-left:8px; }
   .tblwrap { overflow-x:auto; border:1px solid #23262e; border-radius:10px; background:#14161c; }
   table { width:100%; border-collapse:collapse; font-size:13px; white-space:nowrap; }
+  .mbuy { font-size:12px; max-width:170px; }
   th { text-align:left; padding:12px 12px; color:#8a887f; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #23262e; background:#181a20; cursor:pointer; user-select:none; }
   th:hover { color:#d4af37; }
   td { padding:11px 12px; border-bottom:1px solid #1d2027; vertical-align:top; }
@@ -143,6 +144,7 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
         <th onclick="sortH('ppsf',1)">$/SqFt</th>
         <th onclick="sortH('year',1)">Built</th>
         <th>Owner of Record</th>
+        <th>Matched Buyer</th>
         <th onclick="sortH('lead_type')">Type</th>
         <th>Status</th>
         <th>Source</th>
@@ -276,6 +278,13 @@ function roomTag(h) {
   const cls = h.__off <= 15 ? 'new' : (h.__off <= 25 ? 'rec' : 'bad');
   return '<span class="tag ' + cls + '">' + lbl + ' ' + h.__off + '% off</span>';
 }
+function buyerCell(h) {
+  const b = h.buyer || "";
+  if (!b) return '<span class="dim">\u2014</span>';
+  const first = b.split(/[,(]/)[0].trim();
+  if (/^(GAP|NO MATCH|n\/a|N\/A)/i.test(b)) return `<span class="tag rec">${first}</span>`;
+  return `<span class="gold" title="${b.replace(/"/g, "&quot;")}">${first}</span>`;
+}
 function renderH() {
   if (!D) return;
   D.houses.forEach(feeEngine);
@@ -295,6 +304,7 @@ function renderH() {
     <td class="dim">${h.ppsf ? "$" + h.ppsf : "\u2014"}</td>
     <td class="dim">${h.year || "\u2014"}</td>
     <td class="dim">${h.owner || "\u2014"}</td>
+    <td class="mbuy">${buyerCell(h)}</td>
     <td>${h.lead_type || "\u2014"}</td>
     <td><span class="tag ${h.status === "New" ? "new" : "rec"}">${h.status || "\u2014"}</span></td>
     <td>${h.source ? `<a href="${srcUrl(h)}" target="_blank" rel="noopener">listing \u2197</a>` : "\u2014"}</td>
