@@ -321,7 +321,7 @@ function renderStart() {
   D.houses.forEach(feeEngine);
   const live = D.houses.filter(h => h.buyer && !/^(GAP|NO MATCH|n\/a|N\/A)/i.test(h.buyer) && !/dead|no longer|unavailable/i.test(String(h.status || "")));
   live.sort((a, b) => (a.__off ?? 999) - (b.__off ?? 999));
-  const hot = live[0];
+  const hot = live.find(h => /10720/.test(h.address || "")) || live[0]; // pinned to active play (10720 US Hwy 42) — update with the play
   const AGENT = { name: "Claire Schenk", phone: "502-271-7771" };
   const bc = hot ? (hot.buyer_contact || {}) : {};
   const dev = bc.contact ? bc.contact.split(",")[0].trim() : (bc.name || "your developer");
