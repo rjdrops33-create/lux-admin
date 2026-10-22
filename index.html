@@ -416,6 +416,7 @@ function renderStart() {
   renderLogbook();
 }
 const ADMIN_URL = "https://superagent-e1f4347f.base44.app/functions/deckTeamAdmin";
+let TEAM = [];
 async function renderTeam() {
   const wrap = F("teamwrap");
   if (!wrap || !D.user || D.user.role !== "owner") { if (wrap) wrap.style.display = "none"; return; }
@@ -424,8 +425,9 @@ async function renderTeam() {
     const r = await fetch(ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: sessionStorage.getItem("luxpin") || "", action: "list" }) });
     const j = await r.json();
     if (!j.ok) return;
+    TEAM = j.users;
     F("teamcnt").textContent = "(" + j.users.length + ")";
-    F("teamlist").innerHTML = j.users.map(u => `<div class="logrow"><div class="lr-h"><b>${u.name}</b> \u00b7 ${u.role} \u00b7 ${u.kind === "shared" ? "shared key" : "personal login"} \u00b7 ${u.status === "active" ? "active" : "REVOKED"}${u.last_login ? " \u00b7 last in " + new Date(u.last_login).toLocaleString() : ""}</div><div style="margin-top:6px">${u.status === "active" ? `<button class="callbtn" onclick="teamAction('revoke','${u.id}')">Revoke access</button>` : `<button class="callbtn" onclick="teamAction('restore','${u.id}')">Restore</button>`}<button class="callbtn" onclick="teamAction('rotate','${u.id}')">New code</button></div></div>`).join("");
+    F("teamlist").innerHTML = j.users.map(u => `<div class="logrow"><div class="lr-h"><b>${u.name}</b> \u00b7 ${u.role} \u00b7 ${u.kind === "shared" ? "shared key" : "personal login"} \u00b7 ${u.status === "active" ? "active" : "REVOKED"}${u.last_login ? " \u00b7 last in " + new Date(u.last_login).toLocaleString() : ""}</div><div style="margin-top:6px">${u.status === "active" ? `<button class="callbtn" onclick="teamAction('revoke','${u.id}')">Revoke access</button>` : `<button class="callbtn" onclick="teamAction('restore','${u.id}')">Restore</button>`}<button class="callbtn" onclick="teamAction('rotate','${u.id}')">New code</button><button class="callbtn" onclick="teamRename('${u.id}')">Rename</button></div></div>`).join("");
   } catch (_e) { F("teamlist").innerHTML = '<div class="logrow"><div class="lr-h">Team list unreachable \u2014 try refreshing.</div></div>'; }
 }
 window.teamAction = async function (action, id) {
@@ -436,6 +438,17 @@ window.teamAction = async function (action, id) {
     else if (!j.ok) F("addmsg").textContent = "Action failed \u2014 try again";
   } catch (_e) { F("addmsg").textContent = "Action failed \u2014 try again"; }
   renderTeam();
+};
+window.teamRename = async function (id) {
+  const u = (TEAM || []).find(x => x.id === id);
+  const name = prompt("Name shown on the deck and in the logbook for " + (u ? u.name : "this member") + ":", u ? u.name : "");
+  if (!name || !name.trim() || name.trim() === (u || {}).name) return;
+  try {
+    const r = await fetch(ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: sessionStorage.getItem("luxpin") || "", action: "rename", id, name: name.trim() }) });
+    const j = await r.json();
+    if (j.ok) { F("addmsg").textContent = "Renamed to " + j.name + " \u2014 signs them in personalized next time."; renderTeam(); }
+    else F("addmsg").textContent = "Rename failed \u2014 try again";
+  } catch (_e) { F("addmsg").textContent = "Rename failed \u2014 try again"; }
 };
 window.addMember = async function () {
   const name = (F("newName") || {}).value || "";
