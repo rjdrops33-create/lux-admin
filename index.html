@@ -60,6 +60,17 @@
 .chip.rec{background:#3b2f10;color:#e7c868;}
 .chip.warn{background:#332919;color:#e0b96a;}
 .chip.dead{background:#2b1d1d;color:#e08585;}
+.bubble{background:#181a20;border-left:3px solid #d4af37;border-radius:0 10px 10px 0;padding:10px 14px;margin:8px 0;font-size:13px;line-height:1.55;color:#e8e6e1;}
+.bubble .bl{display:block;color:#b9975b;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.logform{margin-top:12px;background:#101318;border:1px solid #23262e;border-radius:10px;padding:12px;}
+.logform input,.logform select,.logform textarea{width:100%;margin-top:8px;padding:9px;background:#0e0f13;border:1px solid #2a2d36;color:#e8e6e1;border-radius:6px;font-size:13px;font-family:inherit;}
+.logform textarea{min-height:60px;resize:vertical;}
+.lf-title{color:#b9975b;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
+.ok{color:#4caf7d;font-size:12px;margin-left:8px;}
+.logrow{background:#14161c;border:1px solid #23262e;border-radius:10px;padding:10px 14px;margin:8px 0;font-size:13px;}
+.logrow .lr-h{color:#8a887f;font-size:11px;}
+.logrow .lr-h b{color:#d4af37;}
+.logrow .notes{color:#c6c8c2;margin-top:4px;white-space:normal;}
 .feekey { color:#8a887f; font-size:11px; margin:6px 0 10px; letter-spacing:.3px; }
   .fee { background:#1d2129; padding:3px 8px; border-radius:6px; }
   .tag.bad { background:#2b1d1d; color:#e05c5c; }
@@ -156,6 +167,8 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
   <h2>Your Next Step</h2>
   <div class="stepgrid" id="steps"></div>
   <div class="plainkey" id="plainkey"></div>
+  <h2>Call Logbook <span class="cnt" id="lcnt"></span></h2>
+  <div id="logbook"></div>
   <details class="acc"><summary>All deck data — houses, buyers, playbook</summary>
   <h2>Scouted Houses <span class="cnt" id="hcnt"></span></h2>
   <div class="feekey">Fee engine: $100k floor &middot; target 4.5% on $2M+ &middot; 7% sub-$2M &middot; dev buys ~72% of ARV &middot; under 3% fee room = walk</div>
@@ -302,39 +315,91 @@ function actionChip(h) {
   if (h.__off <= 25) return '<span class="chip rec">Offer low \u2014 needs a price cut</span>';
   return '<span class="chip rec">Watch \u2014 seller not dealing yet</span>';
 }
+const LOG_URL = "https://superagent-e1f4347f.base44.app/functions/logDeckCall";
 function renderStart() {
   if (!D || !D.houses) return;
   D.houses.forEach(feeEngine);
   const live = D.houses.filter(h => h.buyer && !/^(GAP|NO MATCH|n\/a|N\/A)/i.test(h.buyer) && !/dead|no longer|unavailable/i.test(String(h.status || "")));
   live.sort((a, b) => (a.__off ?? 999) - (b.__off ?? 999));
   const hot = live[0];
-  // Update this per active play (seller-side agent for the hot house):
   const AGENT = { name: "Claire Schenk", phone: "502-271-7771" };
   const bc = hot ? (hot.buyer_contact || {}) : {};
   const dev = bc.contact ? bc.contact.split(",")[0].trim() : (bc.name || "your developer");
+  const member = localStorage.getItem("luxmember") || "";
+  window.WIZ = { address: hot ? hot.address : "", step: "" };
+  const brief1 = [
+    { l: "The house", t: hot ? `${hot.address} \u2014 asking ${fm(hot.asking)}, seller already cut once. 6,700 sqft on ~5 acres, built 1986. Our target: contract at $1.30M or under.` : "No live deal right now \u2014 Scarlet will update this." },
+    { l: "Your introduction", t: `\u201cHi Claire, this is ${member || "[your name]"} calling for Ryian Willis at Willis Acquisitions \u2014 we\u2019re a buyer-side firm. I have a client actively looking in Prospect and I\u2019m calling about 10720 US Highway 42.\u201d` },
+    { l: "Ask exactly these four", t: "1. Is the seller negotiable below asking? 2. Are there other offers right now? 3. What\u2019s the seller\u2019s timeline? 4. Would they accept an option-style or low-earnest contract with a clean, fast close?" },
+    { l: "Rules of the call", t: "Never name your number first. One question at a time. If she asks who the client is: \u201ca local luxury builder \u2014 I\u2019ll bring specifics once I know the seller\u2019s flexibility.\u201d Write her answers down for the logbook." },
+  ];
+  const brief2 = [
+    { l: "What to send", t: "Open the iMessage chat with Scarlet and text what Claire said on all four questions, plus her tone (motivated / firm / annoyed). Scarlet turns it into your developer script with real numbers within minutes." },
+  ];
+  const brief3 = [
+    { l: "Who you\u2019re calling", t: `${dev}${bc.phone ? " \u2014 " + bc.phone : ""}. Builds in the same zip as the house. He buys opportunities, not houses." },
+    { l: "Your introduction \u2014 invite, never offer", t: `\u201c${dev.split(" ")[0]}, it\u2019s ${member || "[your name]"} with Willis Acquisitions, Ryian\u2019s team. I\u2019ve got something live in your zip right now: an \u201986 estate, 6,700 square feet on nearly five acres off 42. Seller\u2019s already cut once and there\u2019s room to deal. Before I bring it to anyone else \u2014 is that the kind of thing you\u2019d want a first look at? And if the all-in number worked for you, could you move this month?\u201d` },
+    { l: "If he asks what you make", t: "\u201cI\u2019m contracted at a number and you\u2019d pay my number \u2014 assigned, not added. It\u2019s in the price, not on top of it.\u201d" },
+    { l: "If he wants the address", t: "\u201cHappy to \u2014 the non-circumvention goes out same day and the full package follows.\u201d" },
+  ];
+  const brief4 = [
+    { l: "After the call", t: "Text Scarlet how it went. If he\u2019s in, she preps the option contract and assignment paperwork \u2014 you just sign. No cash ever leaves your pocket. Then the machine finds the next house." },
+  ];
   const steps = [
-    { t: "Step 1 of 4 \u2014 Call the seller\u2019s agent",
-      d: `Dial <b>${AGENT.name}</b> and ask exactly four things: Is the seller negotiable below asking? Are there other offers? What\u2019s their timeline? Would they accept an option-style contract with no cash upfront? Say it\u2019s for a client \u2014 you\u2019ll bring specifics once you know their flexibility.`,
-      call: AGENT.phone, who: AGENT.name },
-    { t: "Step 2 of 4 \u2014 Tell Scarlet what she said",
-      d: `Open our iMessage chat and text me her answers. I\u2019ll turn them into your developer script with real numbers within minutes.` },
-    { t: "Step 3 of 4 \u2014 Call your developer",
-      d: `Call <b>${dev}</b> using the script I sent. Golden rule: invite, never offer \u2014 \u201cwould something like this interest you?\u201d If yes, get his yes on the numbers and tell him you\u2019ll have paper by tonight.`,
-      call: bc.phone || null, who: dev },
-    { t: "Step 4 of 4 \u2014 Sign",
-      d: `Tell me how the call went. If he\u2019s in, I prep the option contract and assignment paperwork \u2014 you just sign. No cash ever leaves your pocket; the fee is built into the numbers. Then we do it again on the next house.` },
+    { t: "Step 1 of 4 \u2014 Call the seller\u2019s agent", brief: brief1, call: AGENT.phone, who: AGENT.name },
+    { t: "Step 2 of 4 \u2014 Tell Scarlet what she said", brief: brief2 },
+    { t: "Step 3 of 4 \u2014 Call your developer", brief: brief3, call: bc.phone || null, who: dev },
+    { t: "Step 4 of 4 \u2014 Sign", brief: brief4 },
   ];
   let idx = Math.min(Number(localStorage.getItem("luxwiz") || 0), steps.length - 1);
   const s = steps[idx];
   const done = idx >= steps.length - 1;
+  window.WIZ.step = s.t;
   F("steps").innerHTML =
-    `<div class="step"><div class="n">${idx + 1}</div><div class="t"><b>${s.t}</b><br><span style="font-weight:400">${s.d}</span>` +
-    (s.call ? ` <a class="callbtn" href="tel:${String(s.call).replace(/[^\d]/g, "")}">\ud83d\udcde Call ${s.who || ""}</a>` : "") +
-    (done ? ` <button class="callbtn" onclick="wizNext()">Start the next deal \u2192</button>`
-          : ` <button class="callbtn" onclick="wizNext()">Done \u2014 next step \u2192</button>`) +
-    `</div></div>`;
-  F("plainkey").innerHTML = `Only this step matters right now. Everything else (houses, buyers, playbook) is folded below. Stuck or confused? Text Scarlet and she sorts it.`;
+    `<div class="step"><div class="n">${idx + 1}</div><div class="t"><b>${s.t}</b></div>` +
+    s.brief.map(b => `<div class="bubble"><span class="bl">${b.l}</span>${b.t}</div>`).join("") +
+    `<div style="margin-top:12px">` +
+    (s.call ? `<a class="callbtn" href="tel:${String(s.call).replace(/[^\d]/g, "")}">\ud83d\udcde Call ${s.who || ""}</a>` : "") +
+    (done ? `<button class="callbtn" onclick="wizNext()">Start the next deal \u2192</button>`
+          : `<button class="callbtn" onclick="wizNext()">Done \u2014 next step \u2192</button>`) +
+    `</div>` +
+    `<div class="logform"><div class="lf-title">Log this call</div>
+      <input id="memberName" placeholder="Your name" value="${member}">
+      <select id="callOutcome">
+        <option>Reached \u2014 positive</option>
+        <option>Reached \u2014 cold</option>
+        <option>Left voicemail</option>
+        <option>No answer</option>
+        <option>Call back later</option>
+      </select>
+      <textarea id="callNotes" placeholder="Notes: what they said, next steps (optional)"></textarea>
+      <button class="callbtn" onclick="logCall()">Save to logbook</button>
+      <span id="logsaved" class="ok"></span></div>` +
+    `</div>`;
+  F("plainkey").innerHTML = `The bubbles above are your script. Log every call below so the whole team sees progress. Everything else is folded under "All deck data".`;
+  renderLogbook();
 }
+function renderLogbook() {
+  const logs = (D && D.call_logs) || [];
+  F("lcnt").textContent = "(" + logs.length + ")";
+  F("logbook").innerHTML = logs.length ? logs.map(l => {
+    const d = l.when ? new Date(l.when).toLocaleString() : "";
+    return `<div class="logrow"><div class="lr-h"><b>${l.member || "Team"}</b> \u00b7 ${l.outcome || ""} \u00b7 ${d} \u00b7 ${l.step || ""}${l.address ? " \u00b7 " + l.address : ""}</div><div class="notes">${l.notes || ""}</div></div>`;
+  }).join("") : `<div class="logrow"><div class="lr-h">No calls logged yet \u2014 yours will show here for the whole team.</div></div>`;
+}
+window.logCall = async function () {
+  const pin = sessionStorage.getItem("luxpin") || "";
+  const member = (document.getElementById("memberName") || {}).value || "";
+  localStorage.setItem("luxmember", member.trim());
+  const outcome = (document.getElementById("callOutcome") || {}).value || "";
+  const notes = (document.getElementById("callNotes") || {}).value || "";
+  try {
+    const r = await fetch(LOG_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin, member, step: window.WIZ.step, address: window.WIZ.address, outcome, notes }) });
+    const j = await r.json();
+    if (j.ok) { document.getElementById("logsaved").textContent = "\u2713 Saved"; load(); }
+    else document.getElementById("logsaved").textContent = "Save failed \u2014 try again";
+  } catch (_e) { document.getElementById("logsaved").textContent = "Save failed \u2014 try again"; }
+};
 window.wizNext = function () {
   let i = Number(localStorage.getItem("luxwiz") || 0) + 1;
   if (i > 3) i = 0;
