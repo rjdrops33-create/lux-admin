@@ -395,6 +395,7 @@ function renderStart() {
     s.brief.map(b => `<div class="bubble"><span class="bl">${b.l}</span>${b.t}</div>`).join("") +
     `<div style="margin-top:12px">` +
     (s.call ? (IS_DESKTOP ? `<div class="ccard"><div class="cc-who">${s.who || "Contact"}</div><div class="cc-num">${fmtPhone(s.call)}</div><button class="callbtn" onclick="copyNum(String(s.call).replace(/[^\d]/g, ''))">Copy number</button><span id="copymsg" class="ok"></span><div class="cc-sub">Dial from your phone \u2014 your script is above.</div></div>` : `<a class="callbtn" href="${telHref(s.call)}">\ud83d\udcde Call ${s.who || ""}</a>`) : "") +
+    (idx > 0 ? `<button class="callbtn" onclick="wizBack()" style="opacity:.75">\u2190 Back one step</button>` : "") +
     (done ? `<button class="callbtn" onclick="wizNext()">Start the next deal \u2192</button>`
           : `<button class="callbtn" onclick="wizNext()">Done \u2014 next step \u2192</button>`) +
     `</div>` +
@@ -472,6 +473,11 @@ window.logCall = async function () {
 window.wizNext = function () {
   let i = Number(localStorage.getItem("luxwiz") || 0) + 1;
   if (i > 3) i = 0;
+  localStorage.setItem("luxwiz", i);
+  renderStart();
+};
+window.wizBack = function () {
+  let i = Math.max(Number(localStorage.getItem("luxwiz") || 0) - 1, 0);
   localStorage.setItem("luxwiz", i);
   renderStart();
 };
