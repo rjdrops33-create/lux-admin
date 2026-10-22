@@ -47,7 +47,21 @@
   a { color:#9db4d8; text-decoration:none; }
   a:hover { text-decoration:underline; }
   .notes { max-width:280px; white-space:normal; color:#8a887f; font-size:11px; line-height:1.45; }
-  .feekey { color:#8a887f; font-size:11px; margin:6px 0 10px; letter-spacing:.3px; }
+  .stepgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 6px;}
+.step{background:#181a20;border:1px solid #23262e;border-radius:10px;padding:12px 14px;}
+.step .n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#d4af37;color:#0c0d11;font-weight:800;font-size:12px;text-align:center;line-height:22px;margin-bottom:8px;}
+.step .t{color:#e8e6e1;font-size:13px;line-height:1.5;}
+.step .s{display:block;color:#8a887f;font-size:11px;margin-top:6px;}
+.step .callbtn{display:inline-block;margin-top:8px;background:#d4af37;color:#0c0d11;font-weight:700;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px;}
+.plainkey{color:#b9b7ad;font-size:12px;margin:2px 0 12px;}
+.plainkey b{color:#d4af37;font-weight:700;}
+.chip{display:inline-block;margin-top:6px;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.chip.go{background:#14532d;color:#86efac;}
+.chip.rec{background:#3b2f10;color:#e7c868;}
+.chip.warn{background:#332919;color:#e0b96a;}
+.chip.dead{background:#2b1d1d;color:#e08585;}
+@media (max-width:700px){ .stepgrid{grid-template-columns:1fr;} }
+.feekey { color:#8a887f; font-size:11px; margin:6px 0 10px; letter-spacing:.3px; }
   .fee { background:#1d2129; padding:3px 8px; border-radius:6px; }
   .tag.bad { background:#2b1d1d; color:#e05c5c; }
   .banner { background:#2b1d1d; color:#e05c5c; padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:18px; display:none; }
@@ -140,6 +154,9 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
   </header>
   <div class="banner" id="banner"></div>
   <div class="kpis" id="kpis"></div>
+  <h2>Start Here — 3 Steps</h2>
+  <div class="stepgrid" id="steps"></div>
+  <div class="plainkey" id="plainkey"></div>
   <h2>Scouted Houses <span class="cnt" id="hcnt"></span></h2>
   <div class="feekey">Fee engine: $100k floor &middot; target 4.5% on $2M+ &middot; 7% sub-$2M &middot; dev buys ~72% of ARV &middot; under 3% fee room = walk</div>
   <div class="tblwrap">
@@ -199,6 +216,7 @@ async function load() {
     F("dot").className = "pulse";
     F("livetxt").textContent = "live";
     F("banner").style.display = "none";
+    renderStart();
     F("stamp").textContent = "National sweep \u00b7 updated " + new Date(D.generated_at).toLocaleString();
     const K = D.kpis;
     F("kpis").innerHTML =
@@ -273,6 +291,35 @@ function luxCalc() {
   else if (ask > 0) v.textContent = "ceiling = " + Math.round((max / ask) * 100) + "% of asking (needs a " + Math.round((1 - max / ask) * 100) + "% cut)";
   else v.textContent = "fee fits \u2014 go get the seller";
 }
+function actionChip(h) {
+  const st = String(h.status || "").toLowerCase();
+  if (/dead|no longer|unavailable/.test(st)) return '<span class="chip dead">Skip \u2014 off the board</span>';
+  if (/unconfirmed|conflict|paused|hold/.test(st)) return '<span class="chip warn">Don\u2019t call yet \u2014 double-check first</span>';
+  if (!h.buyer || /^(GAP|NO MATCH|n\/a|N\/A)/i.test(h.buyer)) return '<span class="chip warn">Wait \u2014 no developer paired yet</span>';
+  if (!h.__arv) return '<span class="chip warn">Wait \u2014 comps being pulled</span>';
+  if (h.__off <= 15) return '<span class="chip go">Call the developer today</span>';
+  if (h.__off <= 25) return '<span class="chip rec">Offer low \u2014 needs a price cut</span>';
+  return '<span class="chip rec">Watch \u2014 seller not dealing yet</span>';
+}
+function renderStart() {
+  if (!D || !D.houses) return;
+  D.houses.forEach(feeEngine);
+  const live = D.houses.filter(h => h.buyer && !/^(GAP|NO MATCH|n\/a|N\/A)/i.test(h.buyer) && !/dead|no longer|unavailable/i.test(String(h.status || "")));
+  live.sort((a, b) => (a.__off ?? 999) - (b.__off ?? 999));
+  const hot = live[0];
+  let step2 = "No call-ready deal today \u2014 Scarlet texts you the moment one is.";
+  if (hot) {
+    const bc = hot.buyer_contact || {};
+    const who = bc.contact ? bc.contact.split(",")[0] : (bc.name || "the developer");
+    step2 = `Work <b>${hot.address.split(",")[0]}</b> (${fm(hot.asking)})` +
+      (bc.phone ? ` \u2014 call <b>${who}</b>: <a class="callbtn" href="tel:${String(bc.phone).replace(/[^\d]/g, "")}">${bc.phone}</a>` : "");
+  }
+  F("steps").innerHTML =
+    `<div class="step"><div class="n">1</div><div class="t">Nothing. This part is mine.</div><span class="s">Every weekday 7:30 AM I re-verify every house on this deck. Dead listings get pulled before you ever see them.</span></div>` +
+    `<div class="step"><div class="n">2</div><div class="t">${step2}</div><span class="s">Find the house card below. Its chip tells you exactly what to do. Tap the gold number to dial.</span></div>` +
+    `<div class="step"><div class="n">3</div><div class="t">Text me what happened.</div><span class="s">I handle comps, paperwork, the option contract, and lining up the next house.</span></div>`;
+  F("plainkey").innerHTML = "Plain English: <b>Call today</b> = the deal works, dial the developer \u00b7 <b>Offer low</b> = only works below asking \u00b7 <b>Watch</b> = seller isn\u2019t dealing yet \u00b7 <b>Skip</b> = dead. If a card confuses you, text Scarlet.";
+}
 function feeEngine(h) {
   const m = (h.notes || "").match(/ARV est \$?([\d,]+)/i);
   h.__arv = m ? Number(m[1].replace(/,/g, "")) : null;
@@ -311,7 +358,7 @@ function renderH() {
   const k = hsort.k, num = ["asking", "last_cut", "dom", "sqft", "ppsf", "year", "__arv", "__fee", "__off"].includes(k);
   rows.sort((a, b) => { const x = a[k], y = b[k]; if (x == null) return 1; if (y == null) return -1; return (num ? (x > y ? 1 : x < y ? -1 : 0) : String(x).localeCompare(String(y))) * hsort.d; });
   F("houses").querySelector("tbody").innerHTML = rows.map((h) => `<tr>
-    <td class="addr">${h.address ? (srcUrl(h) ? `<a href="${srcUrl(h)}" target="_blank" rel="noopener">${h.address}</a>` : h.address) : "\u2014"}</td>
+    <td class="addr">${h.address ? (srcUrl(h) ? `<a href="${srcUrl(h)}" target="_blank" rel="noopener">${h.address}</a>` : h.address) : "\u2014"}<div>${actionChip(h)}</div></td>
     <td class="dim">${h.area || "\u2014"}</td>
     <td class="gold">${fm(h.asking)}</td>
     <td class="dim">${h.__arv ? fm(h.__arv) : "\u2014"}</td>
