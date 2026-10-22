@@ -47,12 +47,12 @@
   a { color:#9db4d8; text-decoration:none; }
   a:hover { text-decoration:underline; }
   .notes { max-width:280px; white-space:normal; color:#8a887f; font-size:11px; line-height:1.45; }
-  .stepgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 6px;}
+  .stepgrid{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0 6px;max-width:680px;}
 .step{background:#181a20;border:1px solid #23262e;border-radius:10px;padding:12px 14px;}
 .step .n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#d4af37;color:#0c0d11;font-weight:800;font-size:12px;text-align:center;line-height:22px;margin-bottom:8px;}
 .step .t{color:#e8e6e1;font-size:13px;line-height:1.5;}
 .step .s{display:block;color:#8a887f;font-size:11px;margin-top:6px;}
-.step .callbtn{display:inline-block;margin-top:8px;background:#d4af37;color:#0c0d11;font-weight:700;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px;}
+.step .callbtn{-webkit-appearance:none;appearance:none;border:none;cursor:pointer;font-family:inherit;display:inline-block;margin-top:10px;margin-right:8px;background:#d4af37;color:#0c0d11;font-weight:700;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px;}
 .plainkey{color:#b9b7ad;font-size:12px;margin:2px 0 12px;}
 .plainkey b{color:#d4af37;font-weight:700;}
 .chip{display:inline-block;margin-top:6px;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
@@ -60,7 +60,6 @@
 .chip.rec{background:#3b2f10;color:#e7c868;}
 .chip.warn{background:#332919;color:#e0b96a;}
 .chip.dead{background:#2b1d1d;color:#e08585;}
-@media (max-width:700px){ .stepgrid{grid-template-columns:1fr;} }
 .feekey { color:#8a887f; font-size:11px; margin:6px 0 10px; letter-spacing:.3px; }
   .fee { background:#1d2129; padding:3px 8px; border-radius:6px; }
   .tag.bad { background:#2b1d1d; color:#e05c5c; }
@@ -154,9 +153,10 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
   </header>
   <div class="banner" id="banner"></div>
   <div class="kpis" id="kpis"></div>
-  <h2>Start Here — 3 Steps</h2>
+  <h2>Your Next Step</h2>
   <div class="stepgrid" id="steps"></div>
   <div class="plainkey" id="plainkey"></div>
+  <details class="acc"><summary>All deck data — houses, buyers, playbook</summary>
   <h2>Scouted Houses <span class="cnt" id="hcnt"></span></h2>
   <div class="feekey">Fee engine: $100k floor &middot; target 4.5% on $2M+ &middot; 7% sub-$2M &middot; dev buys ~72% of ARV &middot; under 3% fee room = walk</div>
   <div class="tblwrap">
@@ -195,6 +195,7 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
   </div>
   </details>
   <div id="sections"></div>
+  </details>
 <div class="footer">Willis Acquisitions · fee floor $100k+ · data refreshes every 60s · honest labels only: [verified] vs [unverified snippet]</div>
 </div>
 <script>
@@ -307,19 +308,39 @@ function renderStart() {
   const live = D.houses.filter(h => h.buyer && !/^(GAP|NO MATCH|n\/a|N\/A)/i.test(h.buyer) && !/dead|no longer|unavailable/i.test(String(h.status || "")));
   live.sort((a, b) => (a.__off ?? 999) - (b.__off ?? 999));
   const hot = live[0];
-  let step2 = "No call-ready deal today \u2014 Scarlet texts you the moment one is.";
-  if (hot) {
-    const bc = hot.buyer_contact || {};
-    const who = bc.contact ? bc.contact.split(",")[0] : (bc.name || "the developer");
-    step2 = `Work <b>${hot.address.split(",")[0]}</b> (${fm(hot.asking)})` +
-      (bc.phone ? ` \u2014 call <b>${who}</b>: <a class="callbtn" href="tel:${String(bc.phone).replace(/[^\d]/g, "")}">${bc.phone}</a>` : "");
-  }
+  // Update this per active play (seller-side agent for the hot house):
+  const AGENT = { name: "Claire Schenk", phone: "502-271-7771" };
+  const bc = hot ? (hot.buyer_contact || {}) : {};
+  const dev = bc.contact ? bc.contact.split(",")[0].trim() : (bc.name || "your developer");
+  const steps = [
+    { t: "Step 1 of 4 \u2014 Call the seller\u2019s agent",
+      d: `Dial <b>${AGENT.name}</b> and ask exactly four things: Is the seller negotiable below asking? Are there other offers? What\u2019s their timeline? Would they accept an option-style contract with no cash upfront? Say it\u2019s for a client \u2014 you\u2019ll bring specifics once you know their flexibility.`,
+      call: AGENT.phone, who: AGENT.name },
+    { t: "Step 2 of 4 \u2014 Tell Scarlet what she said",
+      d: `Open our iMessage chat and text me her answers. I\u2019ll turn them into your developer script with real numbers within minutes.` },
+    { t: "Step 3 of 4 \u2014 Call your developer",
+      d: `Call <b>${dev}</b> using the script I sent. Golden rule: invite, never offer \u2014 \u201cwould something like this interest you?\u201d If yes, get his yes on the numbers and tell him you\u2019ll have paper by tonight.`,
+      call: bc.phone || null, who: dev },
+    { t: "Step 4 of 4 \u2014 Sign",
+      d: `Tell me how the call went. If he\u2019s in, I prep the option contract and assignment paperwork \u2014 you just sign. No cash ever leaves your pocket; the fee is built into the numbers. Then we do it again on the next house.` },
+  ];
+  let idx = Math.min(Number(localStorage.getItem("luxwiz") || 0), steps.length - 1);
+  const s = steps[idx];
+  const done = idx >= steps.length - 1;
   F("steps").innerHTML =
-    `<div class="step"><div class="n">1</div><div class="t">Nothing. This part is mine.</div><span class="s">Every weekday 7:30 AM I re-verify every house on this deck. Dead listings get pulled before you ever see them.</span></div>` +
-    `<div class="step"><div class="n">2</div><div class="t">${step2}</div><span class="s">Find the house card below. Its chip tells you exactly what to do. Tap the gold number to dial.</span></div>` +
-    `<div class="step"><div class="n">3</div><div class="t">Text me what happened.</div><span class="s">I handle comps, paperwork, the option contract, and lining up the next house.</span></div>`;
-  F("plainkey").innerHTML = "Plain English: <b>Call today</b> = the deal works, dial the developer \u00b7 <b>Offer low</b> = only works below asking \u00b7 <b>Watch</b> = seller isn\u2019t dealing yet \u00b7 <b>Skip</b> = dead. If a card confuses you, text Scarlet.";
+    `<div class="step"><div class="n">${idx + 1}</div><div class="t"><b>${s.t}</b><br><span style="font-weight:400">${s.d}</span>` +
+    (s.call ? ` <a class="callbtn" href="tel:${String(s.call).replace(/[^\d]/g, "")}">\ud83d\udcde Call ${s.who || ""}</a>` : "") +
+    (done ? ` <button class="callbtn" onclick="wizNext()">Start the next deal \u2192</button>`
+          : ` <button class="callbtn" onclick="wizNext()">Done \u2014 next step \u2192</button>`) +
+    `</div></div>`;
+  F("plainkey").innerHTML = `Only this step matters right now. Everything else (houses, buyers, playbook) is folded below. Stuck or confused? Text Scarlet and she sorts it.`;
 }
+window.wizNext = function () {
+  let i = Number(localStorage.getItem("luxwiz") || 0) + 1;
+  if (i > 3) i = 0;
+  localStorage.setItem("luxwiz", i);
+  renderStart();
+};
 function feeEngine(h) {
   const m = (h.notes || "").match(/ARV est \$?([\d,]+)/i);
   h.__arv = m ? Number(m[1].replace(/,/g, "")) : null;
