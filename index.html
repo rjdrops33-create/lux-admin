@@ -150,7 +150,7 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
 <div class="gate" id="gate">
   <h1>WILLIS ACQUISITIONS</h1>
   <p>Command Deck — restricted access</p>
-  <input type="password" id="key" placeholder="Access key" autocomplete="off">
+  <input type="password" id="key" placeholder="Personal access code" autocomplete="off">
   <button onclick="unlock()">Enter</button>
   <div class="err" id="gerr">Wrong key. Try again.</div>
 </div>
@@ -169,6 +169,16 @@ details.acc .body{padding:0 18px 16px 16px;font-size:13px;line-height:1.65;color
   <div class="plainkey" id="plainkey"></div>
   <h2>Call Logbook <span class="cnt" id="lcnt"></span></h2>
   <div id="logbook"></div>
+  <div id="teamwrap" style="display:none">
+    <h2>Team Access <span class="cnt" id="teamcnt"></span></h2>
+    <div class="feekey">Owner-only. Add someone you trust \u2014 you get their personal code to text them once. Revoke works instantly.</div>
+    <div id="teamlist"></div>
+    <div class="logform"><div class="lf-title">Add a team member</div>
+      <input id="newName" placeholder="Their name (shows in the logbook)">
+      <input id="newEmail" placeholder="Their email (optional)">
+      <button class="callbtn" onclick="addMember()">Create their access code</button>
+      <span id="addmsg" class="ok"></span></div>
+  </div>
   <details class="acc"><summary>All deck data — houses, buyers, playbook</summary>
   <h2>Scouted Houses <span class="cnt" id="hcnt"></span></h2>
   <div class="feekey">Fee engine: $100k floor &middot; target 4.5% on $2M+ &middot; 7% sub-$2M &middot; dev buys ~72% of ARV &middot; under 3% fee room = walk</div>
@@ -231,7 +241,8 @@ async function load() {
     F("livetxt").textContent = "live";
     F("banner").style.display = "none";
     renderStart();
-    F("stamp").textContent = "National sweep \u00b7 updated " + new Date(D.generated_at).toLocaleString();
+    renderTeam();
+    F("stamp").textContent = "National sweep \u00b7 updated " + new Date(D.generated_at).toLocaleString() + (D.user ? " \u00b7 signed in as " + D.user.name : "");
     const K = D.kpis;
     F("kpis").innerHTML =
       `<div class="kpi"><div class="v">${K.total_houses}</div><div class="l">Houses Scouted</div></div>` +
@@ -325,7 +336,7 @@ function renderStart() {
   const AGENT = { name: "Claire Schenk", phone: "502-271-7771" };
   const bc = hot ? (hot.buyer_contact || {}) : {};
   const dev = bc.contact ? bc.contact.split(",")[0].trim() : (bc.name || "your developer");
-  const member = localStorage.getItem("luxmember") || "";
+  const member = (D.user && D.user.name) || localStorage.getItem("luxmember") || "";
   window.WIZ = { address: hot ? hot.address : "", step: "" };
   const brief1 = [
     { l: "The house", t: hot ? `${hot.address} \u2014 asking ${fm(hot.asking)}, seller already cut once. 6,700 sqft on ~5 acres, built 1986. Our target: contract at $1.30M or under.` : "No live deal right now \u2014 Scarlet will update this." },
@@ -364,7 +375,7 @@ function renderStart() {
           : `<button class="callbtn" onclick="wizNext()">Done \u2014 next step \u2192</button>`) +
     `</div>` +
     `<div class="logform"><div class="lf-title">Log this call</div>
-      <input id="memberName" placeholder="Your name" value="${member}">
+      <div style="color:#8b94a7;font-size:12px;margin-top:8px">Signed in as ${member} \u2014 your calls log under your name automatically.</div>
       <select id="callOutcome">
         <option>Reached \u2014 positive</option>
         <option>Reached \u2014 cold</option>
@@ -379,6 +390,42 @@ function renderStart() {
   F("plainkey").innerHTML = `The bubbles above are your script. Log every call below so the whole team sees progress. Everything else is folded under "All deck data".`;
   renderLogbook();
 }
+const ADMIN_URL = "https://superagent-e1f4347f.base44.app/functions/deckTeamAdmin";
+async function renderTeam() {
+  const wrap = F("teamwrap");
+  if (!wrap || !D.user || D.user.role !== "owner") { if (wrap) wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  try {
+    const r = await fetch(ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: sessionStorage.getItem("luxpin") || "", action: "list" }) });
+    const j = await r.json();
+    if (!j.ok) return;
+    F("teamcnt").textContent = "(" + j.users.length + ")";
+    F("teamlist").innerHTML = j.users.map(u => `<div class="logrow"><div class="lr-h"><b>${u.name}</b> \u00b7 ${u.role} \u00b7 ${u.kind === "shared" ? "shared key" : "personal login"} \u00b7 ${u.status === "active" ? "active" : "REVOKED"}${u.last_login ? " \u00b7 last in " + new Date(u.last_login).toLocaleString() : ""}</div><div style="margin-top:6px">${u.status === "active" ? `<button class="callbtn" onclick="teamAction('revoke','${u.id}')">Revoke access</button>` : `<button class="callbtn" onclick="teamAction('restore','${u.id}')">Restore</button>`}<button class="callbtn" onclick="teamAction('rotate','${u.id}')">New code</button></div></div>`).join("");
+  } catch (_e) { F("teamlist").innerHTML = '<div class="logrow"><div class="lr-h">Team list unreachable \u2014 try refreshing.</div></div>'; }
+}
+window.teamAction = async function (action, id) {
+  try {
+    const r = await fetch(ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: sessionStorage.getItem("luxpin") || "", action, id }) });
+    const j = await r.json();
+    if (j.ok && action === "rotate" && j.code) F("addmsg").innerHTML = `New code: <b>${j.code}</b> \u2014 text it to them now. Shown only this once.`;
+    else if (!j.ok) F("addmsg").textContent = "Action failed \u2014 try again";
+  } catch (_e) { F("addmsg").textContent = "Action failed \u2014 try again"; }
+  renderTeam();
+};
+window.addMember = async function () {
+  const name = (F("newName") || {}).value || "";
+  if (!name.trim()) { F("addmsg").textContent = "Enter their name first"; return; }
+  const email = (F("newEmail") || {}).value || "";
+  try {
+    const r = await fetch(ADMIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: sessionStorage.getItem("luxpin") || "", action: "add", name: name.trim(), email: email.trim() }) });
+    const j = await r.json();
+    if (j.ok) {
+      F("addmsg").innerHTML = `${j.name}'s code: <b>${j.code}</b> \u2014 text it to them now. Shown only this once; use "New code" if it's lost.`;
+      F("newName").value = ""; F("newEmail").value = "";
+      renderTeam();
+    } else F("addmsg").textContent = "Couldn't add them \u2014 try again";
+  } catch (_e) { F("addmsg").textContent = "Couldn't add them \u2014 try again"; }
+};
 function renderLogbook() {
   const logs = (D && D.call_logs) || [];
   F("lcnt").textContent = "(" + logs.length + ")";
@@ -389,12 +436,10 @@ function renderLogbook() {
 }
 window.logCall = async function () {
   const pin = sessionStorage.getItem("luxpin") || "";
-  const member = (document.getElementById("memberName") || {}).value || "";
-  localStorage.setItem("luxmember", member.trim());
   const outcome = (document.getElementById("callOutcome") || {}).value || "";
   const notes = (document.getElementById("callNotes") || {}).value || "";
   try {
-    const r = await fetch(LOG_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin, member, step: window.WIZ.step, address: window.WIZ.address, outcome, notes }) });
+    const r = await fetch(LOG_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: pin, pin, step: window.WIZ.step, address: window.WIZ.address, outcome, notes }) });
     const j = await r.json();
     if (j.ok) { document.getElementById("logsaved").textContent = "\u2713 Saved"; load(); }
     else document.getElementById("logsaved").textContent = "Save failed \u2014 try again";
