@@ -407,8 +407,8 @@ window.wizNext = function () {
   renderStart();
 };
 function feeEngine(h) {
-  const m = (h.notes || "").match(/ARV est \$?([\d,]+)/i);
-  h.__arv = m ? Number(m[1].replace(/,/g, "")) : null;
+  const m = (h.notes || "").match(/ARV est(?:imate)?[^\d$]*\$?\s*([\d][\d,\.]*)\s*([MmKk])?/);
+  h.__arv = m ? Math.round(Number(m[1].replace(/,/g, "")) * ((m[2] || "").toLowerCase() === "m" ? 1000000 : (m[2] || "").toLowerCase() === "k" ? 1000 : 1)) : null;
   if (!h.__arv || !h.asking) { h.__fee = null; h.__off = null; return; }
   const devBuy = h.__arv * 0.72;
   const band = h.asking >= 2000000 ? 0.045 : 0.07;
