@@ -340,7 +340,7 @@ function renderStart() {
   window.WIZ = { address: hot ? hot.address : "", step: "" };
   const brief1 = [
     { l: "The house", t: hot ? `${hot.address} \u2014 asking ${fm(hot.asking)}, seller already cut once. 6,700 sqft on ~5 acres, built 1986. Our target: contract at $1.30M or under.` : "No live deal right now \u2014 Scarlet will update this." },
-    { l: "Your introduction", t: `\u201cHi Claire, this is ${member || "[your name]"} calling for Ryian Willis at Willis Acquisitions \u2014 we\u2019re a buyer-side firm. I have a client actively looking in Prospect and I\u2019m calling about 10720 US Highway 42.\u201d` },
+    { l: "Your introduction", t: member === "Ryian Willis" ? `\u201cHi Claire, this is Ryian Willis with Willis Acquisitions \u2014 we\u2019re a buyer-side firm. I have a client actively looking in Prospect and I\u2019m calling about 10720 US Highway 42.\u201d` : `\u201cHi Claire, this is ${member || "[your name]"} calling for Ryian Willis at Willis Acquisitions \u2014 we\u2019re a buyer-side firm. I have a client actively looking in Prospect and I\u2019m calling about 10720 US Highway 42.\u201d` },
     { l: "Ask exactly these four", t: "1. Is the seller negotiable below asking? 2. Are there other offers right now? 3. What\u2019s the seller\u2019s timeline? 4. Would they accept an option-style or low-earnest contract with a clean, fast close?" },
     { l: "Rules of the call", t: "Never name your number first. One question at a time. If she asks who the client is: \u201ca local luxury builder \u2014 I\u2019ll bring specifics once I know the seller\u2019s flexibility.\u201d Write her answers down for the logbook." },
   ];
@@ -349,7 +349,7 @@ function renderStart() {
   ];
   const brief3 = [
     { l: "Who you\u2019re calling", t: `${dev}${bc.phone ? " \u2014 " + bc.phone : ""}. Builds in the same zip as the house. He buys opportunities, not houses.` },
-    { l: "Your introduction \u2014 invite, never offer", t: `\u201c${dev.split(" ")[0]}, it\u2019s ${member || "[your name]"} with Willis Acquisitions, Ryian\u2019s team. I\u2019ve got something live in your zip right now: an \u201986 estate, 6,700 square feet on nearly five acres off 42. Seller\u2019s already cut once and there\u2019s room to deal. Before I bring it to anyone else \u2014 is that the kind of thing you\u2019d want a first look at? And if the all-in number worked for you, could you move this month?\u201d` },
+    { l: "Your introduction \u2014 invite, never offer", t: `\u201c${dev.split(" ")[0]}, it\u2019s ${member === "Ryian Willis" ? "Ryian Willis with Willis Acquisitions" : (member || "[your name]") + " with Willis Acquisitions, Ryian\u2019s team"}. I\u2019ve got something live in your zip right now: an \u201986 estate, 6,700 square feet on nearly five acres off 42. Seller\u2019s already cut once and there\u2019s room to deal. Before I bring it to anyone else \u2014 is that the kind of thing you\u2019d want a first look at? And if the all-in number worked for you, could you move this month?\u201d` },
     { l: "If he asks what you make", t: "\u201cI\u2019m contracted at a number and you\u2019d pay my number \u2014 assigned, not added. It\u2019s in the price, not on top of it.\u201d" },
     { l: "If he wants the address", t: "\u201cHappy to \u2014 the non-circumvention goes out same day and the full package follows.\u201d" },
   ];
