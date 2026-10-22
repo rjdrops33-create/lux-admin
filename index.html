@@ -62,6 +62,11 @@
 .chip.dead{background:#2b1d1d;color:#e08585;}
 .bubble{background:#181a20;border-left:3px solid #d4af37;border-radius:0 10px 10px 0;padding:10px 14px;margin:8px 0;font-size:13px;line-height:1.55;color:#e8e6e1;}
 .bubble .bl{display:block;color:#b9975b;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.ccard{display:inline-block;margin-top:12px;background:#101318;border:1px solid #d4af37;border-radius:10px;padding:14px 18px;min-width:220px;}
+.cc-who{color:#d4af37;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;}
+.cc-num{color:#f2f0ea;font-size:20px;font-family:Georgia,serif;margin:4px 0 8px;}
+.cc-sub{color:#8a887f;font-size:11px;margin-top:6px;}
+.ccard .callbtn{display:inline-block;font-size:12px;padding:6px 12px;}
 .logform{margin-top:12px;background:#101318;border:1px solid #23262e;border-radius:10px;padding:12px;}
 .logform input,.logform select,.logform textarea{width:100%;margin-top:8px;padding:9px;background:#0e0f13;border:1px solid #2a2d36;color:#e8e6e1;border-radius:6px;font-size:13px;font-family:inherit;}
 .logform textarea{min-height:60px;resize:vertical;}
@@ -241,6 +246,11 @@ const F = (id) => document.getElementById(id);
 let started = false;
 const fm = (n) => (n == null ? "\u2014" : "$" + Number(n).toLocaleString());
 let D = null;
+const IS_DESKTOP = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+function fmtPhone(d) { const p = String(d || "").replace(/[^\d]/g, ""); return p.length === 10 ? `(${p.slice(0,3)}) ${p.slice(3,6)}-${p.slice(6)}` : String(d || ""); }
+window.copyNum = function (n) { try { navigator.clipboard.writeText(n); } catch (_e) {} const el = document.getElementById("copymsg"); if (el) { el.textContent = "Number copied"; setTimeout(() => el.textContent = "", 1600); } };
+const telHref = (n) => `tel:${String(n).replace(/[^\d]/g, "")}`;
+const phoneLink = (n) => IS_DESKTOP ? fmtPhone(n) : `<a href="${telHref(n)}">${fmtPhone(n)}</a>`;
 let hsort = { k: "last_cut", d: -1 };
 const srcUrl = (h) => (h.source ? String(h.source).split(" | ")[0].trim() : "");
 function sortH(k, num) { if (hsort.k === k) hsort.d *= -1; else { hsort.k = k; hsort.d = -1; } renderH(); }
@@ -270,7 +280,7 @@ async function load() {
       <td class="addr">${b.business || "\u2014"}</td>
       <td class="dim">${b.type || "\u2014"}</td>
       <td class="dim">${b.contact || "\u2014"}</td>
-      <td>${b.phone ? `<a href="tel:${b.phone.replace(/[^0-9]/g, "")}">${b.phone}</a>` : "\u2014"}</td>
+      <td>${b.phone ? phoneLink(b.phone) : "\u2014"}</td>
       <td>${b.email ? `<a href="mailto:${b.email}">${b.email}</a>` : "\u2014"}</td>
       <td>${b.website ? `<a href="${b.website}" target="_blank" rel="noopener">site \u2197</a>` : "\u2014"}</td>
       <td class="dim">${b.area || "\u2014"}</td>
@@ -384,7 +394,7 @@ function renderStart() {
     `<div class="step"><div class="n">${idx + 1}</div><div class="t"><b>${s.t}</b></div>` +
     s.brief.map(b => `<div class="bubble"><span class="bl">${b.l}</span>${b.t}</div>`).join("") +
     `<div style="margin-top:12px">` +
-    (s.call ? `<a class="callbtn" href="tel:${String(s.call).replace(/[^\d]/g, "")}">\ud83d\udcde Call ${s.who || ""}</a>` : "") +
+    (s.call ? (IS_DESKTOP ? `<div class="ccard"><div class="cc-who">${s.who || "Contact"}</div><div class="cc-num">${fmtPhone(s.call)}</div><button class="callbtn" onclick="copyNum(String(s.call).replace(/[^\d]/g, ''))">Copy number</button><span id="copymsg" class="ok"></span><div class="cc-sub">Dial from your phone \u2014 your script is above.</div></div>` : `<a class="callbtn" href="${telHref(s.call)}">\ud83d\udcde Call ${s.who || ""}</a>`) : "") +
     (done ? `<button class="callbtn" onclick="wizNext()">Start the next deal \u2192</button>`
           : `<button class="callbtn" onclick="wizNext()">Done \u2014 next step \u2192</button>`) +
     `</div>` +
@@ -492,7 +502,7 @@ function buyerCell(h) {
   if (/^(GAP|NO MATCH|n\/a|N\/A)/i.test(b)) return `<span class="tag rec">${first}</span>`;
   const bc = h.buyer_contact || {};
   let s = `<span class="gold" title="${b.replace(/"/g, "&quot;")}">${first}</span>`;
-  if (bc.phone) s += ` <a class="devc" href="tel:${String(bc.phone).replace(/[^0-9]/g, "")}">${bc.phone}</a>`;
+  if (bc.phone) s += ` ${IS_DESKTOP ? `<span class="devc">${bc.phone}</span>` : `<a class="devc" href="${telHref(bc.phone)}">${bc.phone}</a>`}`;
   if (bc.email) s += ` <a class="devc" href="mailto:${bc.email}">${bc.email}</a>`;
   return s;
 }
